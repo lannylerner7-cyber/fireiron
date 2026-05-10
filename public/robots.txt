@@ -1,0 +1,13 @@
+# go away Googlebot
+User-agent: Googlebot
+Disallow: /
+
+# slow down Yahoo
+User-agent: Slurp
+Crawl-delay: 1000
+
+User-agent: *
+Disallow: /
+
+User-agent: * 
+Crawl-Delay: 1000

